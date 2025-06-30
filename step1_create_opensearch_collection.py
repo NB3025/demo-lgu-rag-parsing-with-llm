@@ -397,66 +397,43 @@ def main():
         
         print(f"📝 생성할 컬렉션: {COLLECTION_NAME}")
         
-        # 사용자 선택
-        print("\n🔧 작업을 선택하세요:")
-        print("1. 새 컬렉션 생성 (대시보드 액세스 포함)")
-        print("2. 기존 컬렉션의 네트워크 정책 업데이트")
         
-        choice = input("선택 (1 또는 2): ").strip()
+        # 컬렉션 생성
+        collection_info = manager.create_collection_with_policies(COLLECTION_NAME)
         
-        if choice == "1":
-            # 컬렉션 생성
-            collection_info = manager.create_collection_with_policies(COLLECTION_NAME)
+        # 결과 출력
+        print("\n" + "="*60)
+        print("🎉 OpenSearch Serverless 컬렉션 생성 완료!")
+        print("="*60)
+        print(f"컬렉션 이름: {collection_info['name']}")
+        print(f"컬렉션 ID: {collection_info['id']}")
+        print(f"상태: {collection_info['status']}")
+        print(f"엔드포인트: {collection_info['endpoint']}")
+        print(f"ARN: {collection_info['arn']}")
+        print(f"리전: {collection_info['region']}")
+        print("정책:")
+        print(f"  - 암호화: {collection_info['policies']['encryption']}")
+        print(f"  - 네트워크: {collection_info['policies']['network']} (대시보드 액세스 포함)")
+        print(f"  - 액세스: {collection_info['policies']['access']}")
+        print("="*60)
+        
+        # 설정 파일 저장 (다음 단계에서 사용)
+        config = {
+            'collection_name': collection_info['name'],
+            'collection_id': collection_info['id'],
+            'endpoint': collection_info['endpoint'],
+            'host': collection_info['host'],
+            'arn': collection_info['arn'],
+            'region': collection_info['region'],
+            'policies': collection_info['policies']
+        }
+        
+        with open('opensearch_config.json', 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        
+        print("💾 설정 파일 저장 완료: opensearch_config.json")
             
-            # 결과 출력
-            print("\n" + "="*60)
-            print("🎉 OpenSearch Serverless 컬렉션 생성 완료!")
-            print("="*60)
-            print(f"컬렉션 이름: {collection_info['name']}")
-            print(f"컬렉션 ID: {collection_info['id']}")
-            print(f"상태: {collection_info['status']}")
-            print(f"엔드포인트: {collection_info['endpoint']}")
-            print(f"ARN: {collection_info['arn']}")
-            print(f"리전: {collection_info['region']}")
-            print("정책:")
-            print(f"  - 암호화: {collection_info['policies']['encryption']}")
-            print(f"  - 네트워크: {collection_info['policies']['network']} (대시보드 액세스 포함)")
-            print(f"  - 액세스: {collection_info['policies']['access']}")
-            print("="*60)
-            
-            # 설정 파일 저장 (다음 단계에서 사용)
-            config = {
-                'collection_name': collection_info['name'],
-                'collection_id': collection_info['id'],
-                'endpoint': collection_info['endpoint'],
-                'host': collection_info['host'],
-                'arn': collection_info['arn'],
-                'region': collection_info['region'],
-                'policies': collection_info['policies']
-            }
-            
-            with open('opensearch_config.json', 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=2, ensure_ascii=False)
-            
-            print("💾 설정 파일 저장 완료: opensearch_config.json")
-            
-        elif choice == "2":
-            # 기존 컬렉션 업데이트
-            existing_collection = input("기존 컬렉션 이름을 입력하세요 (예: rag-car-manual-208167): ").strip()
-            network_policy_name = input("네트워크 정책 이름을 입력하세요: ").strip()
-            
-            if existing_collection and network_policy_name:
-                result = manager.update_network_policy_for_dashboard(existing_collection, network_policy_name)
-                if result:
-                    print(f"\n✅ 컬렉션 '{existing_collection}'의 네트워크 정책이 업데이트되었습니다.")
-                    print("🖥️ 이제 OpenSearch 대시보드에 액세스할 수 있습니다.")
-                else:
-                    print("❌ 네트워크 정책 업데이트에 실패했습니다.")
-            else:
-                print("❌ 컬렉션 이름과 정책 이름을 모두 입력해야 합니다.")
-        else:
-            print("❌ 잘못된 선택입니다. 1 또는 2를 입력하세요.")
-            
+        
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
         import traceback

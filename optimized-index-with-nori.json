@@ -1,0 +1,126 @@
+{
+  "bedrock-knowledge-base-optimized-index": {
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1",
+        "refresh_interval": "30s",
+        "max_result_window": 50000,
+        "knn": "true"
+      },
+      "analysis": {
+        "analyzer": {
+          "korean_analyzer": {
+            "type": "nori",
+            "decompound_mode": "mixed"
+          },
+          "korean_search_analyzer": {
+            "type": "custom",
+            "tokenizer": "nori_tokenizer",
+            "filter": [
+              "nori_part_of_speech",
+              "nori_readingform",
+              "lowercase"
+            ]
+          }
+        }
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2147483647,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "AMAZON_BEDROCK_METADATA": {
+          "type": "text",
+          "index": false
+        },
+        "AMAZON_BEDROCK_TEXT": {
+          "type": "text",
+          "analyzer": "korean_analyzer",
+          "search_analyzer": "korean_search_analyzer",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            },
+            "raw": {
+              "type": "text",
+              "analyzer": "standard"
+            }
+          }
+        },
+        "AMAZON_BEDROCK_TEXT_CHUNK": {
+          "type": "text",
+          "analyzer": "korean_analyzer"
+        },
+        "bedrock-knowledge-base-default-vector": {
+          "type": "knn_vector",
+          "dimension": 1024,
+          "method": {
+            "engine": "faiss",
+            "space_type": "l2",
+            "name": "hnsw",
+            "parameters": {
+              "ef_construction": 200,
+              "m": 48
+            }
+          }
+        },
+        "id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "x-amz-bedrock-kb-data-source-id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "x-amz-bedrock-kb-document-page-number": {
+          "type": "long"
+        },
+        "x-amz-bedrock-kb-source-uri": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "title_extracted": {
+          "type": "text",
+          "analyzer": "korean_analyzer",
+          "boost": 2.0
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "keywords": {
+          "type": "keyword"
+        },
+        "content_length": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
